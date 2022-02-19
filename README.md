@@ -4,7 +4,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
-In the project directory, you can run:
+Please install yarn first,
+Then in the project directory, you can run:
+
+### `yarn install`
+Automatically install all dependence.
 
 ### `yarn start`
 
