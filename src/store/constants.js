@@ -1,0 +1,1 @@
+export const CONST_VAL = "CONST_VAL"
