@@ -156,7 +156,7 @@ function App() {
                   <Space>
                     <Button type="primary" shape="round" ghost icon={<PlusSquareTwoTone/>} accessKey='c' onClick={e=>{createNote(noteList, setNoteList, curID, setCurID, ID, setID, setCurTitle,setCurContent)}}>New</Button>
                     <Button type="primary" shape="round" ghost icon={<SaveTwoTone/>} accessKey='s' onClick={e=>saveNote(noteList, setNoteList, curID, setCurID, curTitle, curContent, render, setRender, ID, setID, switchTM)}>Save</Button>
-                    <Button type="primary" shape="round" danger ghost icon={<DeleteOutlined />} accessKey='r' onClick={e=>{deleteNote(noteList, setNoteList, curID, setCurID)}}>Delete</Button>
+                    <Button type="primary" shape="round" danger ghost icon={<DeleteOutlined />} accessKey='r' onClick={e=>{deleteNote(noteList, setNoteList, curID, setCurID, setCurTitle, setCurContent)}}>Delete</Button>
                   </Space>
                 </Col>
               <Col span={6}></Col>
@@ -206,7 +206,7 @@ function createNote(noteList, setNoteList, curID, setCurID, ID, setID, setCurTit
   console.log("new node added", curID);
 }
 
-function deleteNote(noteList, setNoteList, curID, setCurID){
+function deleteNote(noteList, setNoteList, curID, setCurID, setCurTitle, setCurContent){
   console.log("in delete", curID);
   let preID = -1;
   let newCurID = -1;
@@ -226,6 +226,18 @@ function deleteNote(noteList, setNoteList, curID, setCurID){
   setNoteList(newNoteList);
 
   setCurID(newCurID);
+
+  let flag = newCurID === -1;
+  if(flag){
+    setCurTitle("")
+    setCurContent("")
+  }else{
+    let targetNote = newNoteList.filter((item)=>{
+      return item.noteID === newCurID;
+    })[0]
+    setCurTitle(targetNote.title);
+    setCurContent(targetNote.content);
+  }
  
   console.log("finish delete", curID);
 }
