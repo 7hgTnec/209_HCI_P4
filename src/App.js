@@ -1,7 +1,12 @@
 import {React, useState, useEffect} from "react";
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeMathJax from "rehype-mathjax";
 import useSpeechToText from 'react-hook-speech-to-text'
+import { Jutsu, useJitsi } from "react-jutsu/dist";
+import webLogo from "./LOGO PNG.png"
 import {Layout, Menu, Button, Input , Row, Col, Space, Popover} from 'antd'
 
 import {
@@ -74,26 +79,43 @@ function App() {
 
   // this used to select whether show Markdown or Text
   let contentDiv;
+
+  const plugins = [remarkGfm, remarkMath, remarkMath, rehypeKatex, rehypeMathJax];
   //console.log(switchTM)
   if(switchTM){
     contentDiv = <Input.TextArea placeholder="Content..." rows='34' value={curContent} onChange={e => {setCurContent(e.target.value); changeToUnsaved(curID, noteList, setNoteList)}}/>
   }
   else{
-    contentDiv = <ReactMarkdown children={curContent} remarkPlugins={[remarkGfm]}></ReactMarkdown>
+    contentDiv = <ReactMarkdown children={curContent} remarkPlugins={plugins}></ReactMarkdown>
   }
 
   const unSaveIcon = <ExclamationCircleTwoTone twoToneColor="#f5222d"/>
   const savedIcon = <CheckCircleTwoTone twoToneColor="#52c41a" />
-  const creatMeeting = <p>Create meeting</p>
+  
 
-  console.log("re render page");
+  const jitsiConfig = {
+    roomName: 'MY-MEETING',
+    displayName: 'Weitao Sun',
+    password: 'password',
+    subject: 'fan',
+    parentNode: 'jitsi-container',
+  };
+  const { loading, my_error, jitsi } = useJitsi(jitsiConfig);
 
-  console.log(results);
+  
+  const creatMeeting = <div style={{width: "800px", height:"400px"}}>
+    {my_error && <p>{my_error}</p>}
+    <Jutsu containerStyles={{ width: '800px', height: '400px' }}></Jutsu>
+    <div id={jitsiConfig.parentNode} />
+  </div>
+
+  //console.log(results);
   if(results.length>0){
-    let voiceString = curContent + results.pop().transcript;
+    let voiceString = curContent + results.pop().transcript + " ";
     console.log(voiceString);
     setCurContent(voiceString);
   }
+
 
   return (
     <Layout className="site-layout-background">
@@ -109,7 +131,9 @@ function App() {
             //background:'#e6f7ff',
           }}
         >
-          <div className="logo" style={{height: '32px', margin: '16px', background:"#fff"}}/>
+          <div className="logo" style={{height: '32px', margin: '16px', background:"#112a45"}}>
+            <img src={webLogo} alt="" srcset="" style={{height: '32px', margin: '16px', margin:'0', paddingLeft: '52px'}}/>
+          </div>
           <Menu theme="dark" mode="inline" selectedKeys={curID === -1? []: [curID.toString()]}>
             {
               noteList.map((item)=>{
@@ -132,7 +156,7 @@ function App() {
                   <Space>
                     <Button type="primary" shape="round" ghost icon={<PlusSquareTwoTone/>} accessKey='c' onClick={e=>{createNote(noteList, setNoteList, curID, setCurID, ID, setID, setCurTitle,setCurContent)}}>New</Button>
                     <Button type="primary" shape="round" ghost icon={<SaveTwoTone/>} accessKey='s' onClick={e=>saveNote(noteList, setNoteList, curID, setCurID, curTitle, curContent, render, setRender, ID, setID, switchTM)}>Save</Button>
-                    <Button type="primary" shape="round" danger ghost icon={<DeleteOutlined />} accessKey='d' onClick={e=>{deleteNote(noteList, setNoteList, curID, setCurID)}}>Delete</Button>
+                    <Button type="primary" shape="round" danger ghost icon={<DeleteOutlined />} accessKey='r' onClick={e=>{deleteNote(noteList, setNoteList, curID, setCurID)}}>Delete</Button>
                   </Space>
                 </Col>
               <Col span={6}></Col>
@@ -143,7 +167,7 @@ function App() {
                             ></Button></Col>
               <Col span={1}><Button type="primary" shape="circle" icon={<CalculatorTwoTone />} ghost></Button></Col>
               <Col span={1}>
-                <Popover placement="bottomRight" title={<p>title</p>} content={creatMeeting} trigger="click">
+                <Popover placement="bottomRight" title={<p>Start Meeting</p>} content={creatMeeting} trigger="click">
                   <Button type="primary" shape="circle" icon={<VideoCameraTwoTone />} ghost></Button>
                 </Popover></Col>
               <Col span={2}></Col>
@@ -152,7 +176,7 @@ function App() {
           </Header>
           <Menu className="site-layout-background" mode="horizontal"></Menu>
           <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
-            <div className="site-layout-background" style={{ padding: 52 }}>
+            <div className="site-layout-background" style={{ padding: 52 , height: "910px"}}>
               <Input placeholder="Please input title" allowClear='True' value={curTitle} onChange={e => {setCurTitle(e.target.value); changeToUnsaved(curID, noteList, setNoteList)}}/>
               <hr/>
               {contentDiv}
@@ -260,7 +284,7 @@ function saveNote(noteList, setNoteList, curID, setCurID, curTitle, curContent, 
 function changeToUnsaved(curID, noteList, setNoteList){
   let newNoteList = noteList;
   newNoteList.forEach((item) => {
-    if(curID == item.noteID){
+    if(curID === item.noteID){
       item.saved = false
     }
   });
