@@ -47,6 +47,7 @@ function App() {
   const [curTitle, setCurTitle] = useState("");       // this used to handle current title
   const [curContent, setCurContent] = useState("");   // this used to handle current content
   const [curType, setCurType] = useState("Default");
+  const [curKeyword, setCurKeyword] = useState("")
   const [curAuto, setCurAuto] = useState(true);
   const [noteList, setNoteList] = useState([]);       // this is the list to store all notes
                                                       // each note          include following member values:
@@ -150,11 +151,11 @@ function App() {
   else{
     console.log(typeVector[curType])
     keywordsList = typeVector[curType].map((item)=>{
-      return <Tag closable={true} onClose={(tag)=>{console.log(tag)}}>{item}</Tag>
+      return <Tag closable={true} onClose={e=>{changeKeywords(item, curType, typeVector, setTypeVector)}}>{item}</Tag>
     })
   }
 
-  console.log("curType: ", curType)
+
   
   return (
     <Layout className="site-layout-background">
@@ -173,8 +174,8 @@ function App() {
           <div className="logo" style={{height: '32px', margin: '16px', background:"#112a45"}}>
             <img src={webLogo} alt="" srcset="" style={{height: '32px', margin: '16px', margin:'0', paddingLeft: '52px'}}/>
           </div>
-          <Menu theme="dark" mode="inline" selectedKeys={curID === -1? []: [curID.toString()]}>
-            <SubMenu key="sub0" title="Default">
+          <Menu theme="dark" mode="inline" selectedKeys={curID === -1? []: [curID.toString()]} defaultOpenKeys={['Default', 'Note', 'Code', 'TODO']}>
+            <SubMenu key="Default" title="Default">
               {
                 noteList.filter((item)=>{
                   return (item.type === undefined || item.type === "" || item.type === "Default")
@@ -189,7 +190,7 @@ function App() {
                 })
               }
             </SubMenu>
-            <SubMenu key="sub1" title="Note">
+            <SubMenu key="Note" title="Note">
             {
                 noteList.filter((item)=>{
                   return (item.type === "Note")
@@ -207,7 +208,7 @@ function App() {
                 })
               }
             </SubMenu>
-            <SubMenu key="sub2" title="Code">
+            <SubMenu key="Code" title="Code">
             {
                 noteList.filter((item)=>{
                   return (item.type === "Code")
@@ -224,7 +225,7 @@ function App() {
                 })
               }
             </SubMenu>
-            <SubMenu key="sub3" title="TODO">
+            <SubMenu key="TODO" title="TODO">
             {
                 noteList.filter((item)=>{
                   return (item.type === "TODO")
@@ -285,6 +286,9 @@ function App() {
               }
               <p>Keywords:</p>
               {keywordsList}
+              <Input style = {{width:'128px', height:'30px'}} prefix={<PlusOutlined />} value = {curKeyword} placeholder="New keyword"
+                onPressEnter={e=>{addKeywords(e.target.value, curType, typeVector, setTypeVector, render, setRender); setCurKeyword("");}}
+                onChange={e=>{setCurKeyword(e.target.value)}} ></Input>
               <hr/>
               {contentDiv}
             </div>
@@ -484,6 +488,26 @@ function changeAuto(e, curID, curAuto, setCurAuto, noteList, setNoteList, render
   });
   setNoteList(newNoteList);
   setRender(render + 1);
+}
+
+function changeKeywords(item, curType, typeVector, setTypeVector){
+  let newVector = typeVector;
+  newVector[curType].forEach((e, index) => {
+    if(e === item){
+      newVector[curType].splice(index, 1)
+    }
+  });
+
+  setTypeVector(newVector);
+}
+
+function addKeywords(keywords, curType, typeVector, setTypeVector, render, setRender){
+  console.log(keywords);
+  let newVector = typeVector;
+  newVector[curType].push(keywords);
+  setTypeVector(newVector)
+  setRender(render + 1)
+
 }
 
 //      |-noteID:     unique ID set by ID
